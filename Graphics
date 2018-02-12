@@ -1,0 +1,289 @@
+package pedestrian_flow;
+
+import java.awt.*;
+import javax.swing.*;
+
+import java.awt.event.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+
+
+public class graphics extends JPanel implements ActionListener 
+	{
+
+	//----------------------------------------------------------------------------------------------------------------------------------
+		static int time_gap = 1000; 	// in milliseconds
+		
+		private static final JTextArea TEXT_AREA1 = new JTextArea();
+		private static final JTextArea TEXT_AREA2 = new JTextArea();
+		private static final JButton BUTTON = new JButton("START");
+		private static final JButton EXIT = new JButton("EXIT");
+	
+		private static int archakClicks = 0;
+		private static boolean flag = false;
+		static ScheduledFuture<?> currentTask;
+		public static BufferedReader reader;
+		
+		private static ArrayList<JLabel> labelList = new ArrayList<JLabel>();
+		private static int pedCount = 0; // Default value
+	//----------------------------------------------------------------------------------------------------------------------------------
+				
+		public static void setPedCount(int pedCount) 
+			{
+				graphics.pedCount = pedCount;
+			}
+		
+		//----------------------------------------------------------------------------------------------------------------------------------
+					
+		public static void setLabelList() 
+			{
+				for (int i = 0; i < pedCount; i++) 
+					{
+						labelList.add(new JLabel(new ImageIcon("pedestrian.jpg")));
+					}
+			}
+		
+		//----------------------------------------------------------------------------------------------------------------------------------
+				
+		public graphics() 
+			{
+				setLabelList();
+				TEXT_AREA1.setLineWrap(true);
+				TEXT_AREA1.setWrapStyleWord(true);
+				TEXT_AREA1.setEditable(false);
+				
+				TEXT_AREA2.setLineWrap(true);
+				TEXT_AREA2.setWrapStyleWord(true);
+				TEXT_AREA2.setEditable(false);
+				
+				// JTextArea jtaNote = new JTextArea("This is a text area", 5, 20);
+			//	jtaNote.setLineWrap(true);
+			//	jtaNote.setWrapStyleWord(true);
+				
+
+				JLabel jlbLabel1 = new JLabel(new ImageIcon("testpic.jpg"));
+				
+				
+				
+				setLayout(null);
+		
+				TEXT_AREA1.setBounds(2,195,745,30); // (x,y,width,height)
+				TEXT_AREA1.setText("Click  START to run simulation");
+				TEXT_AREA1.setForeground(Color.green);
+				TEXT_AREA1.setBackground(Color.black);
+				TEXT_AREA1.setFont(new Font("Courier", Font.BOLD, 22));
+				
+				TEXT_AREA2.setBounds(747,195,1000,30); // (x,y,width,height)
+				TEXT_AREA2.setText("Click  EXIT to quit");
+				TEXT_AREA2.setForeground(Color.cyan);
+				TEXT_AREA2.setBackground(Color.black);
+				TEXT_AREA2.setFont(new Font("Courier", Font.BOLD, 22));
+				
+				BUTTON.setBounds(1750,195,75,25); // (x,y,width,height)
+				
+				EXIT.setBounds(1830,195,62,25); // (x,y,width,height)
+				jlbLabel1.setBounds(0,0,1890,190);
+			//	jtaNote.setBounds(40, 40, 1000, 40);
+				for (int i = 0; i < pedCount; i++) 
+					{
+						// System.out.println(i);
+						labelList.get(i).setBounds(-10,-10,10,10); // (x,y,width,height)
+					}
+				
+				for (int i = 0; i < pedCount; i++) 
+					{
+						add(labelList.get(i));
+					}
+				
+				add(TEXT_AREA1);
+				add(BUTTON);		
+				add(EXIT);
+				add(jlbLabel1);
+			//	add(jtaNote);
+				add(TEXT_AREA2);
+				
+				BUTTON.addActionListener(this);
+				EXIT.addActionListener(this);
+			}
+
+		//----------------------------------------------------------------------------------------------------------------------------------
+		
+		public void actionPerformed(ActionEvent e)
+		{
+	 		if(e.getSource() == BUTTON)
+	 			archakClicks++; 
+	 		
+	 		if (e.getSource() == EXIT) 
+	 		{
+	 			System.exit(0);
+	 		}
+	 	
+	 		if (archakClicks % 2 == 1)
+		 		{
+		 			flag = false;
+		 			BUTTON.setText("STOP");
+		 			startProject();
+		 		}
+	
+	 		else 
+		 		{
+		 			flag = true;
+		 			try 
+			 			{
+							reader.close();
+						} 
+			 		catch (IOException e1) 
+						{
+							
+						}
+		 			BUTTON.setText("START");
+		 			stopProject();
+		 		}
+	 	}
+
+		//----------------------------------------------------------------------------------------------------------------------------------
+			
+		public static Future<?> getFuture() 
+			{
+				return currentTask;
+			}
+
+		//----------------------------------------------------------------------------------------------------------------------------------
+			
+	 	public static void startProject() 
+		 	{
+		 		try 
+		 			{
+			 	 		reader = new BufferedReader(new FileReader("finalmain_data.txt"));
+			 	 		TEXT_AREA1.setText("");
+			 	 		ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+			 			currentTask = executor.scheduleAtFixedRate(new Runnable() 
+			 			
+				 			{
+				 				String line = "";
+				 				@Override
+				 				public void run() 
+				 					{
+				 					
+				 						try 
+						 					{ //System.out.println("here 3");
+						 						
+							 	 					if (flag) 
+								 	 					{
+								 	 						getFuture().cancel(true);
+								 	 					//	System.out.println("Here 1");
+								 	 					}
+							 	 					else 
+								 	 					{
+								 	 						
+								 	 						for (int i = 0; i < 4; i++) 
+									 	 						{
+									 	 							reader.readLine(); 	
+									 	 						}
+								 	 						
+								 	 						for (int i = 0; i < pedCount; i++) 
+									 	 						{
+									 	 							line = reader.readLine();
+									 	 							String[] array = line.split("\t");
+									 	 							
+									 	 							int x = (int)Float.parseFloat(array[1])*20; //*100;
+									 	 							int y = (int)(Float.parseFloat(array[2])*Math.sin (Math.toRadians(60))*20); //*100;
+									 	 				
+									 	 							labelList.get(i).setBounds(x,y,10,10); 	 							
+									 	 						}
+								 	 						
+								 	 						TEXT_AREA1.setText("Click to STOP to stop");
+								 	 						TEXT_AREA1.setForeground(Color.red);
+								 	 						TEXT_AREA1.setFont(new Font("Courier", Font.BOLD, 22));
+							 	 						
+								 	 					}
+						 					}
+					 					catch(Exception e) 
+						 					{
+						 						e.printStackTrace();
+						 					}
+				 					}
+				 			}, 0, time_gap , TimeUnit.MILLISECONDS);
+			 			
+			 			//reader.close();
+			 		}
+		 		 
+		 		catch (Exception e) 
+			 		{
+			 			try 
+				 			{
+								reader.close();
+							} 
+				 		catch (IOException e1) 
+				 			{
+								// // TODO Auto-generated catch block
+							}
+			 		}
+		
+		 	}
+
+		//----------------------------------------------------------------------------------------------------------------------------------
+			
+	 	public static void stopProject() 
+		 	{
+		 		TEXT_AREA1.setText("Click START to start again");
+		 		TEXT_AREA1.setForeground(Color.green);
+				TEXT_AREA1.setFont(new Font("Courier", Font.BOLD, 22));
+				
+				for (int i = 0; i < pedCount; i++) 
+					{
+						labelList.get(i).setBounds(-10,0,10,10); 	 							
+					}
+				
+		 	}
+
+		//----------------------------------------------------------------------------------------------------------------------------------
+	 	public static void pedCount()
+		{
+	 		
+	 		try 
+	 			{
+		 	 		final BufferedReader reader1 = new BufferedReader(new FileReader("finalmain_data.txt"));
+		 	 		
+			 			{
+			 				String line = reader1.readLine();
+					 		String[] array = line.split("\t");
+			 					 	 							
+					 		pedCount = Integer.parseInt(array[0]); 
+					 	 						
+						 }
+			 		reader1.close();
+	 			}
+			catch(Exception e) 
+				{
+					// do here
+				}
+		//  System.out.println(pedCount);
+		//	return pedCount;
+		}
+		//----------------------------------------------------------------------------------------------------------------------------------
+                                                 
+	 	public static void main(String[] args) 
+	 	{
+	 		pedCount();
+	 		graphics rachana = new graphics();
+	 		final JFrame frame = new JFrame("Footpath");
+	 		frame.setContentPane(rachana);
+	 		frame.setVisible(true);
+	 		frame.setSize(1900,260);  // (width,height)
+	 		frame.setResizable(false);
+	
+	 		frame.addWindowListener
+		 		(
+		 				new WindowAdapter() 
+			 		{
+			 			public void windowClosing(WindowEvent e)
+				 			{
+				 				System.exit(0);
+				 			}
+			 		}
+		 		);
+	 	}
+	
+	} 
