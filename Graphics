@@ -20,7 +20,7 @@ public class graphics extends JPanel implements ActionListener
 		private static final JButton BUTTON = new JButton("START");
 		private static final JButton EXIT = new JButton("EXIT");
 	
-		private static int archakClicks = 0;
+		private static int rachanaClicks = 0;
 		private static boolean flag = false;
 		static ScheduledFuture<?> currentTask;
 		public static BufferedReader reader;
@@ -112,14 +112,14 @@ public class graphics extends JPanel implements ActionListener
 		public void actionPerformed(ActionEvent e)
 		{
 	 		if(e.getSource() == BUTTON)
-	 			archakClicks++; 
+	 			rachanaClicks++; 
 	 		
 	 		if (e.getSource() == EXIT) 
 	 		{
 	 			System.exit(0);
 	 		}
 	 	
-	 		if (archakClicks % 2 == 1)
+	 		if (rachanaClicks % 2 == 1)
 		 		{
 		 			flag = false;
 		 			BUTTON.setText("STOP");
